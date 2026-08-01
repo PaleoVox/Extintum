@@ -1,39 +1,121 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Estratotipos + Desafío</title>
-<link rel="icon" type="image/x-icon" href="coleoptero.ico">
+  <meta charset="UTF-8">
+  <title>Página de Bienvenida</title>
+  <link rel="icon" type="image/x-icon" href="angio.ico">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-image: url('FondoExtinctum.jpg');
+      background-size: cover;
+      background-position: center;
+      overflow-x: hidden;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
 
-<style>
-  body {
-    margin: 0;
-    height: 100vh;
-    display: flex;
-  }
+    /* Overlay semitransparente */
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4); /* negro con 40% de transparencia */
+      z-index: 0;
+    }
 
-  .panel {
-    width: 50%;
-    height: 100%;
-    border: none;
-  }
+    h1 {
+      margin-top: 50px;
+      font-size: 6em;
+      color: white;
+      text-shadow: 2px 2px 5px black;
+      animation: wave 4s infinite ease-in-out;
+      z-index: 1; /* encima del overlay */
+    }
 
-  iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-  }
-</style>
+    @keyframes wave {
+      0% { transform: translateY(0px); }
+      25% { transform: translateY(-15px); }
+      50% { transform: translateY(0px); }
+      75% { transform: translateY(15px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .botones {
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 60px;
+      z-index: 1; /* encima del overlay */
+    }
+
+    .boton {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: none;
+      font-size: 1.6em;
+      font-weight: bold;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.5);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .boton:hover {
+      transform: scale(1.15) rotate(3deg); /* animacion */
+      box-shadow: 0 0 25px rgba(255,255,255,0.9), 0 12px 20px rgba(0,0,0,0.6);
+    }
+
+    .tierra {
+      background-color: #00c698; /* color azulverdoso */
+    }
+
+    .oro {
+      background-color: #FFD700; /* amarillo-oro */
+      color: black;
+    }
+  </style>
 </head>
 <body>
+  <h1>¡Bienvenidos!</h1>
 
-<div class="panel">
-  <iframe src="estratotipo.html"></iframe>
-</div>
+  <div class="botones">
+     <button class="boton tierra" onclick="window.open('tablero/index.html', '_blank')">Tablero</button>
+     <button class="boton oro" onclick="window.open('mazos/index.html', '_blank')">Mazos de cartas</button>
+  </div>
 
-<div class="panel">
-  <iframe src="desafiofinal.html"></iframe>
-</div>
+  <script>
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
+    function playPop() {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.08);
+
+      gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.08);
+    }
+
+    document.querySelectorAll(".boton").forEach(boton => {
+      boton.addEventListener("mouseenter", playPop);
+    });
+  </script>
 </body>
 </html>

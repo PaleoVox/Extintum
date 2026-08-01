@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Cartas aleatorias</title>
+<style>
+  body {
+    font-family: Arial;
+    text-align: center;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
+  }
+
+  h2 { margin-top: 20px; }
+
+  .card-container {
+    perspective: 1000px;
+    width: 220px;
+    margin: 20px auto;
+  }
+
+  .card {
+    width: 100%;
+    aspect-ratio: 2/3;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.8s;
+  }
+
+  .card.flip {
+    transform: rotateY(180deg);
+  }
+
+  .card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    overflow: hidden;
+  }
+
+  .card-face::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -75%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(120deg, rgba(255,255,255,0.2), rgba(255,255,255,0));
+    transform: skewX(-20deg);
+  }
+
+  .card.flip .card-face::after {
+    animation: shine 0.8s forwards;
+  }
+
+  @keyframes shine {
+    0% { left: -75%; }
+    100% { left: 125%; }
+  }
+
+  .front {
+    transform: rotateY(180deg);
+  }
+
+  .back {
+    background-image: url('desafio/reverso.png');
+  }
+
+  button {
+    margin: 10px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 25px;
+    background: #ffcc00;
+    color: #333;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+
+  button:hover {
+    background: #ffd633;
+    transform: scale(1.05);
+  }
+
+  #info { margin-top: 15px; font-size: 18px; }
+</style>
+</head>
+<body>
+
+<h2>Mazo de desafio</h2>
+
+<div class="card-container">
+  <div class="card" id="card">
+    <div class="card-face back" id="back"></div>
+    <div class="card-face front" id="front"></div>
+  </div>
+</div>
+
+<button onclick="drawCard()">Sacar carta</button>
+<button onclick="resetDeck()">Reiniciar</button>
+
+<p id="info"></p>
+
+<script>
+let deck = [];
+let remaining = [];
+let isFlipped = false; // NUEVO estado
+
+// asociaciones reverso -> cartas
+const groups = {
+  'desafio/morado.png': [
+    'desafio/10_morado.png','desafio/22_morado.png','desafio/2_morado.png'
+  ],
+  'desafio/rosa.png': [
+    'desafio/11_rosa.png','desafio/23_rosa.png','desafio/3_rosa.png'
+  ],
+  'desafio/verde-azul.png': [
+    'desafio/12_azul-verdoso.png','desafio/24_verde-azulado.png','desafio/4_verde azulado.png'
+  ],
+  'desafio/celeste.png': [
+    'desafio/13_celeste.png','desafio/17_celeste.png','desafio/25_celeste.png','desafio/5_celeste.png'
+  ],
+  'desafio/cafe.png': [
+    'desafio/14_cafe.png','desafio/18_cafe.png','desafio/26_cafe.png','desafio/6_cafe.png'
+  ],
+  'desafio/rojo.png': [
+    'desafio/15_rojo.png','desafio/19_rojo.png','desafio/27_rojo.png','desafio/7_rojo.png'
+  ],
+  'desafio/verde.png': [
+    'desafio/16_verde.png','desafio/1_verde.png','desafio/20_verde.png','desafio/21_verde.png','desafio/28_verde.png','desafio/8_verde.png','desafio/9_verde.png'
+  ]
+};
+
+function initDeck() {
+  deck = [];
+  for (const back in groups) {
+    groups[back].forEach(card => {
+      deck.push({ front: card, back: back });
+    });
+  }
+  remaining = [...deck];
+}
+
+initDeck();
+
+function drawCard() {
+  const cardEl = document.getElementById('card');
+  const front = document.getElementById('front');
+  const back = document.getElementById('back');
+
+  // 🔁 Segundo click: cerrar carta
+  if (isFlipped) {
+    cardEl.classList.remove('flip');
+    isFlipped = false;
+    document.getElementById('info').innerText = `Restan ${remaining.length} cartas`;
+    return;
+  }
+
+  // ❌ Sin cartas
+  if (remaining.length === 0) {
+    document.getElementById('info').innerText = 'No quedan cartas';
+    return;
+  }
+
+  // 🎴 Primer / tercer click: nueva carta
+  let index = Math.floor(Math.random() * remaining.length);
+  let selected = remaining.splice(index, 1)[0];
+
+  front.style.backgroundImage = `url('${selected.front}')`;
+  back.style.backgroundImage = `url('${selected.back}')`;
+
+  cardEl.classList.add('flip');
+  isFlipped = true;
+
+  document.getElementById('info').innerText = `Restan ${remaining.length} cartas`;
+}
+
+function resetDeck() {
+  initDeck();
+  const cardEl = document.getElementById('card');
+  cardEl.classList.remove('flip');
+  document.getElementById('front').style.backgroundImage = '';
+  document.getElementById('back').style.backgroundImage = "url('desafio/reverso.png')";
+  document.getElementById('info').innerText = 'Baraja reiniciada';
+  isFlipped = false; // importante
+}
+</script>
+
+</body>
+</html>

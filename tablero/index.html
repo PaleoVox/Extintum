@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Extinctum</title>
+<link rel="icon" type="image/x-icon" href="ammo.ico">
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #1e3c72 100%);
+  min-height: 100vh;
+}
+
+/* ================= Esta parte es para controlar la parte SUPERIOR ================= */
+.superior {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.lado-izquierdo {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* ZOOM */
+.controles-zoom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.9);
+  padding: 10px 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.controles-zoom button {
+  width: 35px;
+  height: 35px;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: #4CAF50;
+  color: white;
+  transition: all 0.2s;
+}
+
+.controles-zoom button:hover {
+  background-color: #45a049;
+  transform: scale(1.1);
+}
+
+#zoomValue {
+  font-weight: bold;
+  min-width: 45px;
+  text-align: center;
+}
+
+/* DADO */
+#dado {
+  width: 80px;
+  height: 80px;
+  font-size: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid #333;
+  border-radius: 10px;
+  background-color: white;
+  transition: transform 0.2s ease;
+}
+
+#botonDado {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 8px;
+  border: none;
+  background-color: #FFD700;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#botonDado:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(255,255,255,0.8), 0 8px 16px rgba(0,0,0,0.5);
+}
+
+/* ================= Taxones o fichas de los jugadores ================= */
+
+.zona-piezas {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.zona-piezas-header {
+  text-align: center;
+  font-weight: bold;
+  font-size: 16px;
+  color: white;
+  text-transform: uppercase;
+}
+
+.marco-fichas {
+  background: linear-gradient(145deg, #2c3e50, #34495e);
+  border: 3px solid #ecf0f1;
+  border-radius: 12px;
+  padding: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.contenedor-pieza {
+  position: relative;
+  width: 45px;
+  height: 45px;
+}
+
+.pieza {
+  width: 45px;
+  height: 45px;
+  cursor: grab;
+  position: absolute;
+  font-size: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.7));
+}
+
+.pieza:active {
+  cursor: grabbing;
+  z-index: 1000;
+}
+
+.pieza img {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ================= TABLERO ================= */
+
+.tablero-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* esto es para mantenerlo siempre arriba cuando se modifique el tamaño */
+  padding: 10px 20px 20px 20px;
+}
+
+.tablero {
+  position: relative;
+  width: 100%;
+  max-width: 1400px;
+  background-image: url('tablero.png');
+  background-size: cover;
+  background-position: center;
+  aspect-ratio: 6946 / 4883;
+
+  transform-origin: top center; /* parametro asoc. a la posicion siempre arriba*/
+  transition: transform 0.3s ease;
+}
+
+/* GRID */
+.grid-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(60, 1fr);
+  grid-template-rows: repeat(42, 1fr);
+}
+
+.zona-snap {
+  pointer-events: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="superior">
+  <div class="lado-izquierdo">
+    <button id="botonDado" onclick="tirarDado()">Tirar dado</button>
+    <div id="dado">🎲</div>
+
+    <div class="controles-zoom">
+      <button onclick="cambiarZoom(-10)">−</button>
+      <span id="zoomValue">100%</span>
+      <button onclick="cambiarZoom(10)">+</button>
+    </div>
+  </div>
+
+  <div class="zona-piezas">
+    <div class="zona-piezas-header">Taxones / Fichas</div>
+    <div class="marco-fichas">
+        <div class="contenedor-pieza"><img src="ammo.png" id="pieza1" class="pieza"></div>
+        <div class="contenedor-pieza"><img src="angio.png" id="pieza2" class="pieza"></div>
+        <div class="contenedor-pieza"><img src="cocodrilo.png" id="pieza3" class="pieza"></div>
+        <div class="contenedor-pieza"><img src="coleoptero.png" id="pieza4" class="pieza"></div>
+        <div class="contenedor-pieza"><img src="dino.png" id="pieza5" class="pieza"></div>
+        <div class="contenedor-pieza"><img src="fora.png" id="pieza6" class="pieza"></div>
+        <div class="contenedor-pieza"><img src="pez.png" id="pieza7" class="pieza"></div>
+        <div class="contenedor-pieza"><img src="ptero.png" id="pieza8" class="pieza"></div>
+    </div>
+  </div>
+</div>
+
+<div class="tablero-container">
+  <div class="tablero" id="tablero">
+    <div class="grid-overlay" id="gridOverlay"></div>
+  </div>
+</div>
+
+<script>
+let zoomLevel = 100;
+let piezaActual = null;
+let offsetX = 0;
+let offsetY = 0;
+
+const gridCols = 60;
+const gridRows = 42;
+
+const gridOverlay = document.getElementById('gridOverlay');
+for (let i = 0; i < gridCols * gridRows; i++) {
+  const d = document.createElement('div');
+  d.className = 'zona-snap';
+  gridOverlay.appendChild(d);
+}
+
+/* ZOOM */
+function cambiarZoom(delta) {
+  zoomLevel += delta;
+  zoomLevel = Math.max(50, Math.min(200, zoomLevel));
+
+  const tablero = document.getElementById('tablero');
+  tablero.style.transform = `scale(${zoomLevel/100})`;
+
+  document.getElementById('zoomValue').textContent = zoomLevel + '%';
+}
+
+/* DRAG CORREGIDO */
+document.querySelectorAll('.pieza').forEach(p => {
+  p.addEventListener('mousedown', iniciarArrastre);
+});
+
+function iniciarArrastre(e) {
+  piezaActual = e.target.closest('.pieza');
+
+  const rect = piezaActual.getBoundingClientRect();
+  const tablero = document.getElementById('tablero');
+  const tableroRect = tablero.getBoundingClientRect();
+
+  const escala = zoomLevel / 100;
+
+  offsetX = (e.clientX - rect.left) / escala;
+  offsetY = (e.clientY - rect.top) / escala;
+
+  if (piezaActual.parentElement !== tablero) {
+    tablero.appendChild(piezaActual);
+  }
+
+  piezaActual.style.position = 'absolute';
+
+  piezaActual.style.left = ((rect.left - tableroRect.left) / escala) + 'px';
+  piezaActual.style.top = ((rect.top - tableroRect.top) / escala) + 'px';
+
+  document.addEventListener('mousemove', moverPieza);
+  document.addEventListener('mouseup', soltarPieza);
+}
+
+function moverPieza(e) {
+  if (!piezaActual) return;
+
+  const tablero = document.getElementById('tablero');
+  const rect = tablero.getBoundingClientRect();
+  const escala = zoomLevel / 100;
+
+  piezaActual.style.left =
+    ((e.clientX - rect.left) / escala - offsetX) + 'px';
+
+  piezaActual.style.top =
+    ((e.clientY - rect.top) / escala - offsetY) + 'px';
+}
+
+function soltarPieza() {
+  document.removeEventListener('mousemove', moverPieza);
+  document.removeEventListener('mouseup', soltarPieza);
+  piezaActual = null;
+}
+
+/* DADO ORIGINAL */
+function tirarDado() {
+  const dado = document.getElementById("dado");
+
+  let contador = 0;
+  const intervalo = setInterval(() => {
+    const numeroTemporal = Math.floor(Math.random() * 6) + 1;
+    dado.textContent = numeroTemporal;
+    dado.style.transform = `rotate(${contador * 30}deg)`;
+    contador++;
+  }, 100);
+
+  setTimeout(() => {
+    clearInterval(intervalo);
+    const numeroFinal = Math.floor(Math.random() * 6) + 1;
+    dado.textContent = numeroFinal;
+    dado.style.transform = "scale(1.2)";
+    setTimeout(() => {
+      dado.style.transform = "scale(1)";
+    }, 200);
+  }, 1500);
+}
+</script>
+
+</body>
+</html>
